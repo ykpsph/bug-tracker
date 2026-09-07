@@ -2,7 +2,21 @@
 
 A full-stack bug tracking system with Spring Boot backend and React frontend.
 
-<img src="./docs/images/image.png" width="800" alt="alt text"><img src="./docs/images/image-1.png" width="600" alt="alt text">
+<img src="./docs/images/image.png" width="500" alt="alt text"><img src="./docs/images/image-1.png" width="400" alt="alt text">
+
+# **Evolution of the Project** 
+
+- [x] Phase 1 — Application → Spring Boot + React + PostgreSQL
+- [x] [Phase 2](/docs/phases/02-docker.md) — Containerization → Docker + Docker Compose
+
+- [ ] Phase 3 — Orchestration → Kubernetes
+- [ ] Phase 4 — Packaging → Helm
+- [ ] Phase 5 — Cloud Infrastructure → Floci
+- [ ] Phase 6 — Infrastructure as Code → Terraform
+- [ ] Phase 7 — CI GitHub → Actions
+- [ ] Phase 8 — GitOps → ArgoCD
+- [ ] Phase 9 — Observability Prometheus + Grafana + CloudWatch
+- [ ] Phase 10 — Production Architecture → EKS + RDS + S3 + ALB + Route53 + ACM
 
 ## Features
 - Dashboard with bug statistics and charts
@@ -37,16 +51,4 @@ docker-compose up --build
 # Backend API: http://localhost:8081/api
 ```
 
-# **Evolution of the Project** 
 
-- [x] Phase 1 — Application → Spring Boot + React + PostgreSQL
-- [x] [Phase 2](/docs/phases/02-docker.md) — Containerization → Docker + Docker Compose
-
-- [ ] Phase 3 — Orchestration → Kubernetes
-- [ ] Phase 4 — Packaging → Helm
-- [ ] Phase 5 — Cloud Infrastructure → Floci
-- [ ] Phase 6 — Infrastructure as Code → Terraform
-- [ ] Phase 7 — CI GitHub → Actions
-- [ ] Phase 8 — GitOps → ArgoCD
-- [ ] Phase 9 — Observability Prometheus + Grafana + CloudWatch
-- [ ] Phase 10 — Production Architecture → EKS + RDS + S3 + ALB + Route53 + ACM
