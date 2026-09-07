@@ -13,9 +13,6 @@ RUN npm run build
 # Stage 2: Runtime
 FROM nginx:alpine
 
-# Non-root user (nginx zaten non-root çalışıyor)
-# Nginx default olarak 'nginx' user'ı ile çalışır
-
 # Build edilmiş dosyaları kopyala
 COPY --from=build /app/dist /usr/share/nginx/html
 
