@@ -1,12 +1,8 @@
 # Bug Tracker Application
 
 A full-stack bug tracking system with Spring Boot backend and React frontend.
-![alt text](/docs/images/image.png)
-![alt text](/docs/images/image-1.png)
 
-
-<img src="./docs/images/image.png" width="100" alt="alt text"><img src="./docs/images/image-1.png" width="100" alt="alt text">
-
+<img src="./docs/images/image.png" width="800" alt="alt text"><img src="./docs/images/image-1.png" width="600" alt="alt text">
 
 ## Features
 - Dashboard with bug statistics and charts

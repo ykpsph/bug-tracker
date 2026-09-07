@@ -1,6 +1,6 @@
 # Phase 2 — Docker & Docker Compose
 
-<img src="/docs/images/image.png" width="800" alt="alt text"><img src="/docs/images/image-1.png" width="600" alt="alt text">
+<img src="/docs/images/image.png" width="400" alt="alt text"><img src="/docs/images/image-1.png" width="400" alt="alt text">
 
 ## Overview
 
