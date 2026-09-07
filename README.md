@@ -1,6 +1,6 @@
 # Bug Tracker Application
 
-A full-stack bug tracking system with Spring Boot backend and React frontend.
+Full-stack Bug Tracker built with Spring Boot, React and PostgreSQL, evolving into a **production-style DevOps & Cloud deployment project**.
 
 <img src="./docs/images/image.png" width="400" alt="alt text"><img src="./docs/images/image-1.png" width="400" alt="alt text">
 
