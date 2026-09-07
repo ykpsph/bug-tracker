@@ -2,7 +2,7 @@
 
 A full-stack bug tracking system with Spring Boot backend and React frontend.
 
-<img src="./docs/images/image.png" width="500" alt="alt text"><img src="./docs/images/image-1.png" width="400" alt="alt text">
+<img src="./docs/images/image.png" width="400" alt="alt text"><img src="./docs/images/image-1.png" width="400" alt="alt text">
 
 # **Evolution of the Project** 
 
