@@ -184,6 +184,14 @@ docker compose down -v
 
 The last command should be used carefully because removing the PostgreSQL volume also removes the persisted database data.
 
+To create and push the images to Dockerhub :
+```bash
+docker build -t dscc86y/bugtrackerbackend:latest ./backend
+docker push dscc86y/bugtracker-backend:latest
+docker build -t dscc86y/bugtracker-frontend:latest ./frontend
+docker push dscc86y/bugtracker-frontend:latest
+```
+
 ## Next Phase
 
 The next step is to move from running the application with Docker Compose to orchestrating the application with Kubernetes.
