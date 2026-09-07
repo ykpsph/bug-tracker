@@ -1,0 +1,59 @@
+bug-tracker/
+├── backend/
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── java/com/bugtracker/
+│   │   │   │   ├── BugTrackerApplication.java
+│   │   │   │   ├── config/
+│   │   │   │   │   ├── CorsConfig.java
+│   │   │   │   │   └── WebConfig.java
+│   │   │   │   ├── controller/
+│   │   │   │   │   ├── AuthController.java
+│   │   │   │   │   └── BugController.java
+│   │   │   │   ├── model/
+│   │   │   │   │   ├── Bug.java
+│   │   │   │   │   └── User.java
+│   │   │   │   ├── repository/
+│   │   │   │   │   ├── BugRepository.java
+│   │   │   │   │   └── UserRepository.java
+│   │   │   │   ├── service/
+│   │   │   │   │   ├── BugService.java
+│   │   │   │   │   └── UserService.java
+│   │   │   │   └── dto/
+│   │   │   │       ├── BugRequest.java
+│   │   │   │       └── LoginRequest.java
+│   │   │   └── resources/
+│   │   │       └── application.properties
+│   │   └── test/
+│   └── pom.xml
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Layout/
+│   │   │   │   ├── Sidebar.jsx
+│   │   │   │   └── Header.jsx
+│   │   │   ├── Dashboard/
+│   │   │   │   ├── Dashboard.jsx
+│   │   │   │   └── BugCharts.jsx
+│   │   │   ├── Bugs/
+│   │   │   │   ├── BugList.jsx
+│   │   │   │   ├── BugForm.jsx
+│   │   │   │   └── BugDetails.jsx
+│   │   │   └── Login/
+│   │   │       └── Login.jsx
+│   │   ├── context/
+│   │   │   └── AuthContext.jsx
+│   │   ├── services/
+│   │   │   ├── api.js
+│   │   │   └── auth.js
+│   │   ├── App.jsx
+│   │   ├── main.jsx
+│   │   └── index.css
+│   ├── package.json
+│   ├── vite.config.js
+│   └── index.html
+├── docker-compose.yml
+├── Dockerfile.backend
+├── Dockerfile.frontend
+├── nginx.conf
+└── README.md
