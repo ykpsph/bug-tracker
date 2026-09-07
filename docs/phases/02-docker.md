@@ -71,7 +71,7 @@ The Dockerfile is responsible for:
 
 ### Frontend Dockerfile
 
-```Dockerfile
+```dockerfile
 # Stage 1: Build
 FROM node:20-alpine AS build
 WORKDIR /app
@@ -111,7 +111,74 @@ Keeping the frontend and backend in separate images allows them to be developed,
 ### Docker Compose
 
 Docker Compose is used to run the complete application stack with a single configuration.
+```dockerfile
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: bugtracker-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bugtracker-network
+    restart: unless-stopped
 
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: bugtracker-backend
+    ports:
+      - "8081:8081"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: ${DB_URL}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DDL_AUTO: ${DB_DDL_AUTO:-update}
+      DB_SHOW_SQL: ${DB_SHOW_SQL:-false}
+      SERVER_PORT: ${SERVER_PORT:-8081}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    networks:
+      - bugtracker-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: bugtracker-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      VITE_API_URL: /api
+    networks:
+      - bugtracker-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    name: bugtracker_postgres_data
+
+networks:
+  bugtracker-network:
+    name: bugtracker_network
+    driver: bridge
+```
 The Compose setup currently includes:
 
 * React frontend
@@ -176,13 +243,11 @@ To stop the containers while keeping the database volume:
 docker compose down
 ```
 
-To remove the containers and associated volumes:
+To remove the containers and associated volumes: (use carefully because removing the PostgreSQL volume also removes the persisted database data.)
 
 ```bash
 docker compose down -v
 ```
-
-The last command should be used carefully because removing the PostgreSQL volume also removes the persisted database data.
 
 To create and push the images to Dockerhub :
 ```bash
