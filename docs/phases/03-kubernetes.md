@@ -243,3 +243,132 @@ spec:
           initialDelaySeconds: 10
           periodSeconds: 5
 ```
+
+### 05-frontend-deployment.yaml
+- **Açıklama:** Frontend'i ayağa kaldırır ve cluster içi ağ iletişimini sağlar. İki nesneden oluşur:
+  1. **ClusterIP Service (`kind: Service`):** Frontend podlarının önüne dahili bir yük dengeleyici koyarak cluster içinden 3000 portu ile erişim sağlar.
+  2. **Deployment (`kind: Deployment`):** Durum bilgisi olmayan, yani durumsuz (stateless) frontend podlarını yönetir. `replicas: 2` ayarı ile H.A. sunar.
+- **Önemli Özellikler:**
+  - **API Yönlendirmesi (Reverse Proxy Hazırlığı):** `VITE_API_URL: "/api"` ortam değişkeni tanımlanarak, frontend'in backend isteklerini doğrudan `/api` path'ine yapması sağlanmıştır.
+  - **Optimize Kaynak Yönetimi:** (128Mi - 256Mi RAM) cluster kaynakları optimize edilmiştir.
+  - **Sağlık Kontrolleri:** Pod sağlığı, uygulamanın kök dizinine (`/`) yapılan HTTP GET istekleriyle düzenli olarak doğrulanır.
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: bugtracker
+  labels:
+    app: frontend
+spec:
+  selector:
+    app: frontend
+  ports:
+  - port: 3000        # Service'in dinlediği port
+    targetPort: 3000  # Pod'un dinlediği port
+  type: ClusterIP
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: bugtracker
+  labels:
+    app: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: dscc86y/bugtracker-frontend:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000     # Container içinde Nginx'in (fe uygulaması) dinlediği  port
+        env:
+        - name: VITE_API_URL
+          value: "/api"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+```
+
+## Final
+**Açıklama:** Tüm manifestolar hazırlandıktan sonra, projenin Kubernetes üzerinde ayağa kaldırılması ve durumunun doğrulanması için aşağıdaki adımlar takip edilir.
+  - `kubernetes/` altındaki tüm YAML dosyalarını tek seferde sıralı bir şekilde cluster'a yükle :
+```text
+kubectl apply -f kubernetes/
+```
+**beklenen output:** 
+```text
+namespace/bugtracker created
+configmap/bugtracker-config created
+secret/bugtracker-secrets created
+service/postgres created
+statefulset.apps/postgres created
+service/backend created
+deployment.apps/backend created
+service/frontend created
+deployment.apps/frontend created
+```
+
+  - Oluşturulan tüm nesnelerin durumunu, podların ayağa kalkma süreçlerini ve ağ yapılandırmasını doğrulamak için `bugtracker` namespace'i altındaki tüm kaynakları listeleyin:
+
+```yaml
+kubectl get all -n bugtracker
+
+veya canlı takip etmek için :
+
+kubectl get pods -n bugtracker -w
+```
+
+**beklenen output :**
+```text
+NAME                            READY   STATUS    RESTARTS      AGE
+pod/backend-56dbf557bd-2nrxh    0/1     Running   2 (75s ago)   4m27s
+pod/backend-56dbf557bd-xqm4l    0/1     Running   2 (45s ago)   4m27s
+pod/frontend-846dc949f7-skglj   1/1     Running   0             4m27s
+pod/frontend-846dc949f7-v7tzw   1/1     Running   0             4m27s
+pod/postgres-0                  0/1     Pending   0             24s
+
+NAME               TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
+service/backend    ClusterIP   10.105.118.202   <none>        8081/TCP   4m27s
+service/frontend   ClusterIP   10.98.61.87      <none>        3000/TCP   4m27s
+service/postgres   ClusterIP   None             <none>        5432/TCP   82s
+
+NAME                       READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/backend    0/2     2            0           4m27s
+deployment.apps/frontend   2/2     2            2           4m27s
+
+NAME                                  DESIRED   CURRENT   READY   AGE
+replicaset.apps/backend-56dbf557bd    2         2         0       4m27s
+replicaset.apps/frontend-846dc949f7   2         2         2       4m27s
+
+NAME                        READY   AGE
+statefulset.apps/postgres   0/1     24s
+```

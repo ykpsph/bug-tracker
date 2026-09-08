@@ -5,13 +5,13 @@ metadata:
   namespace: bugtracker
   labels:
     app: postgres
-  spec:
-    selector:
-      app: postgres
-    ports:
-    - port: 5432
-      targetPort: 5432
-    clusterIP: None
+spec:
+  selector:
+    app: postgres
+  ports:
+  - port: 5432        # Service'in dinlediği port
+    targetPort: 5432  # Pod'un dinlediği port
+  clusterIP: None
 
 ---
 
@@ -35,7 +35,7 @@ spec:
       - name: postgres
         image: postgres:15-alpine
         ports:
-        - containerPort: 5432
+        - containerPort: 5432   # Container içinde uygulamanın dinlediği port
         env:
         - name: POSTGRES_DB
           value: "bugtracker"
@@ -67,20 +67,20 @@ spec:
             - bugtracker
           initialDelaySeconds: 30
           periodSeconds: 10
-          readinessProbe:
-            exec:
-              command:
-              - pg_isready
-              - -U
-              - bugtracker
-            initialDelaySeconds: 5
-            periodSeconds: 5
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - bugtracker
+          initialDelaySeconds: 5
+          periodSeconds: 5
   volumeClaimTemplates:
   - metadata:
       name: postgres-data
-      spec:
-        accessModes: ["ReadWriteOnce"]
-        resources:
-          requests:
-            storage: 1Gi
-        storageClassName: standard
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi
+      storageClassName: standard

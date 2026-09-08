@@ -35,7 +35,7 @@ spec:
         image: dscc86y/bugtracker-backend:latest
         imagePullPolicy: Always
         ports:
-        - containerPort: 8081
+        - containerPort: 8081    # container içinde backend uygulamasının dinlediği port
         env: 
         - name: DB_URL
           valueFrom:
