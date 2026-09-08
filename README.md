@@ -9,7 +9,7 @@ Full-stack Bug Tracker built with Spring Boot, React and PostgreSQL, evolving in
 - [x] Phase 1 — Application → Spring Boot + React + PostgreSQL
 - [x] [Phase 2](/docs/phases/02-docker.md) — Containerization → Docker + Docker Compose
 
-- [ ] Phase 3 — Orchestration → Kubernetes
+- [x] [Phase 3](/docs/phases/03-kubernetes.md) — Orchestration → Kubernetes
 - [ ] Phase 4 — Packaging → Helm
 - [ ] Phase 5 — Cloud Infrastructure → Floci
 - [ ] Phase 6 — Infrastructure as Code → Terraform
