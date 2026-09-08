@@ -1,5 +1,5 @@
 apiVersion: v1
-kind: Service
+kind: Service       # service 
 metadata:
   name: backend
   namespace: bugtracker
@@ -16,7 +16,7 @@ spec:
 ---
 
 apiVersion: apps/v1
-kind: Deployment
+kind: Deployment      # deployment
 metadata:
   name: backend
   namespace: bugtracker
@@ -64,6 +64,12 @@ spec:
               key: DB_SHOW_SQL
         - name: SERVER_PORT
           value: "8081"
+          # İSİM DEĞİŞİKLİĞİ: Spring Boot'un k8s profilini kesin okuması için standart env adı eklendi
+        - name: SPRING_PROFILES_ACTIVE
+          valueFrom:
+            configMapKeyRef:
+              name: bugtracker-config
+              key: SPRING_PROFILES_ACTIVE
         - name: LOG_LEVEL
           valueFrom:
             configMapKeyRef:
@@ -78,13 +84,13 @@ spec:
             cpu: "500m"
         livenessProbe:
           httpGet:
-            path: /actuator/health
+            path: /api/bugs
             port: 8081
-          initialDelaySeconds: 30
+          initialDelaySeconds: 90 # 30'dan 90 saniyeye çıkarıldı çünkü backend uygulaması başlatılırken PostgreSQL'in hazır olmasını beklemek için daha uzun bir süreye ihtiyaç duyuyor. 34 sn falan
           periodSeconds: 10
         readinessProbe:
           httpGet:
-            path: /actuator/health
+            path: /api/bugs
             port: 8081
-          initialDelaySeconds: 10
+          initialDelaySeconds: 60 # aynı şekilde, backend uygulamasının PostgreSQL'e bağlanabilmesi için daha uzun bir süreye ihtiyaç duyuyor.
           periodSeconds: 5
