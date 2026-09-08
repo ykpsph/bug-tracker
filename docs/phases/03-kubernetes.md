@@ -142,3 +142,104 @@ spec:
             storage: 1Gi
         storageClassName: standard
 ```
+
+### 04-backend-deployment.yaml
+- **Açıklama:** Backend servisini ayağa kaldırır ve cluser içi erişim ağını tanımlar. İki nesneden oluşur:
+  1. **ClusterIP Service (`kind: Service`):** Backend podlarının önüne dahili bir yük dengeleyici koyar. Cluster içindeki (örneğin frontend) diğer bileşenlerin backend'e `http://backend:8081` adresinden ulaşmasını sağlar.
+  2. **Deployment (`kind: Deployment`):** Durum bilgisi olmayan (stateless) backend podlarını yönetir. H.A. için `replicas: 2` ayarı ile 2 adet kopya pod çalıştırır.
+- **Önemli Özellikler:**
+  - **Dinamik Veri Enjeksiyonu:** `DB_URL`, `bugtracker-secrets` 'nesnesinden'; genel ayarlar (`DB_DDL_AUTO`, `LOG_LEVEL` vb.) ise `bugtracker-config` nesnesinden çekilerek ortama enjekte edilir.
+  - **Gelişmiş Sağlık Kontrolleri:** Podların durumu Spring Boot Actuator (`/actuator/health`) üzerinden HTTP istekleriyle (`httpGet`) izlenir. `livenessProbe` ve trafiğe hazır olma (`readinessProbe`) durumları dinamik olarak denetlenir.
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: bugtracker
+  labels:
+    app: backend
+spec:
+  selector:
+    app: backend
+  ports:
+  - port: 8081
+    targetPort: 8081
+  type: ClusterIP
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: bugtracker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: dscc86y/bugtracker-backend:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8081
+        env: 
+        - name: DB_URL
+          valueFrom:
+            secretKeyRef:
+              name: bugtracker-secrets
+              key: DB_URL
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: bugtracker-secrets
+              key: DB_USERNAME
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: bugtracker-secrets
+              key: DB_PASSWORD
+        - name: DB_DDL_AUTO
+          valueFrom:
+            configMapKeyRef:
+              name: bugtracker-config
+              key: DB_DDL_AUTO
+        - name: DB_SHOW_SQL
+          valueFrom:
+            configMapKeyRef:
+              name: bugtracker-config
+              key: DB_SHOW_SQL
+        - name: SERVER_PORT
+          value: "8081"
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: bugtracker-config
+              key: LOG_LEVEL
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8081
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8081
+          initialDelaySeconds: 10
+          periodSeconds: 5
+```
