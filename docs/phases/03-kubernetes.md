@@ -26,3 +26,20 @@ data:
   LOG_LEVEL: "INFO"
   SPRING_PROFILES_ACTIVE: "k8s"
 ```
+
+### 02-secret.yaml - db bilgileri
+```yaml
+apiVersion: v
+kind: Secret
+metadata:
+  name: bugtracker-secrets
+  namespace: bugtracker
+type: Opaque
+data:
+  # echo -n "bugtracker" | base64
+  DB_USERNAME: YnVndHJhY2tlcg==
+  # echo -n "bugtracker123" | base64
+  DB_PASSWORD: YnVndHJhY2tlcjEyMw==
+  # echo -n "jdbc:postgresql://postgres:5432/bugtracker" | base64
+  DB_URL: amRiYzpwb3N0Z3Jlc3FsOi8vcG9zdGdyZXM6NTQzMi9idWd0cmFja2Vy
+```
