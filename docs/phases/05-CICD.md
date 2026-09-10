@@ -436,6 +436,7 @@ repo:ykpsph@52661595/bug-tracker@1360628134:ref:refs/heads/main
 ```
 
 Dolayısıyla Trust Policy'deki `sub` koşulu gerçek token ile eşleşmiyordu.
+![alt text](/docs/images/image818.png)
 
 ---
 
