@@ -33,7 +33,17 @@ jobs:
       - name: Set image tag
         id: vars
         run: echo "tag=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
-
+      - name: Debug OIDC token claims
+        run: |
+          echo "=== GitHub Context ==="
+          echo "Repository: ${{ github.repository }}"
+          echo "Repository owner: ${{ github.repository_owner }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Ref name: ${{ github.ref_name }}"
+          echo "Event name: ${{ github.event_name }}"
+          echo ""
+          echo "=== Expected sub (old format) ==="
+          echo "repo:${{ github.repository }}:ref:${{ github.ref }}"
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
