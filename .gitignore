@@ -23,3 +23,7 @@ frontend/.env.local
 
 # OS
 Thumbs.db
+
+# AWS IAM policy files (account-specific, applied manually)
+trust-policy.json
+permissions-policy.json

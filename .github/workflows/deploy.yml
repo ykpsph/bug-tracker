@@ -1,0 +1,134 @@
+name: Build and Deploy to EKS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:  # Manuel tetikleme için
+
+env:
+  AWS_REGION: eu-central-1
+  AWS_ACCOUNT_ID: "297784246811"
+  ECR_BACKEND: bugtracker-backend
+  ECR_FRONTEND: bugtracker-frontend
+  EKS_CLUSTER: bugtracker-cluster
+  K8S_NAMESPACE: bugtracker
+
+permissions:
+  id-token: write   # OIDC için gerekli
+  contents: read    # Checkout için
+
+jobs:
+  # ─────────────────────────────────────────
+  # Job 1: Backend image build & push
+  # ─────────────────────────────────────────
+  build-push-backend:
+    name: Build & Push Backend
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.vars.outputs.tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set image tag
+        id: vars
+        run: echo "tag=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::297784246811:role/GitHubActionsBugTrackerDeployRole
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, push backend
+        working-directory: backend
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          IMAGE_TAG: ${{ steps.vars.outputs.tag }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_BACKEND:$IMAGE_TAG .
+          docker tag  $ECR_REGISTRY/$ECR_BACKEND:$IMAGE_TAG $ECR_REGISTRY/$ECR_BACKEND:latest
+          docker push $ECR_REGISTRY/$ECR_BACKEND:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_BACKEND:latest
+
+  # ─────────────────────────────────────────
+  # Job 2: Frontend image build & push
+  # ─────────────────────────────────────────
+  build-push-frontend:
+    name: Build & Push Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set image tag
+        id: vars
+        run: echo "tag=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::297784246811:role/GitHubActionsBugTrackerDeployRole
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, push frontend
+        working-directory: frontend
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          IMAGE_TAG: ${{ steps.vars.outputs.tag }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_FRONTEND:$IMAGE_TAG .
+          docker tag  $ECR_REGISTRY/$ECR_FRONTEND:$IMAGE_TAG $ECR_REGISTRY/$ECR_FRONTEND:latest
+          docker push $ECR_REGISTRY/$ECR_FRONTEND:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_FRONTEND:latest
+
+  # ─────────────────────────────────────────
+  # Job 3: Deploy to EKS
+  # ─────────────────────────────────────────
+  deploy:
+    name: Deploy to EKS
+    runs-on: ubuntu-latest
+    needs: [build-push-backend, build-push-frontend]
+    steps:
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::297784246811:role/GitHubActionsBugTrackerDeployRole
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --region $AWS_REGION \
+            --name $EKS_CLUSTER
+
+      - name: Deploy backend
+        env:
+          IMAGE_TAG: ${{ needs.build-push-backend.outputs.image_tag }}
+        run: |
+          kubectl set image deployment/backend \
+            backend=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_BACKEND:$IMAGE_TAG \
+            -n $K8S_NAMESPACE
+          kubectl rollout status deployment/backend -n $K8S_NAMESPACE --timeout=5m
+
+      - name: Deploy frontend
+        env:
+          IMAGE_TAG: ${{ needs.build-push-backend.outputs.image_tag }}
+        run: |
+          kubectl set image deployment/frontend \
+            frontend=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_FRONTEND:$IMAGE_TAG \
+            -n $K8S_NAMESPACE
+          kubectl rollout status deployment/frontend -n $K8S_NAMESPACE --timeout=5m
+
+      - name: Verify rollout
+        run: |
+          kubectl get pods -n $K8S_NAMESPACE
+          kubectl get deployment -n $K8S_NAMESPACE
