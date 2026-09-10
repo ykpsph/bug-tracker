@@ -21,9 +21,6 @@ jobs:
   # ─────────────────────────────────────────
   # Job 1: Backend image build & push
   # ─────────────────────────────────────────
-    # ─────────────────────────────────────────
-  # Job 1: Backend image build & push
-  # ─────────────────────────────────────────
   build-push-backend:
     name: Build & Push Backend
     runs-on: ubuntu-latest
@@ -36,27 +33,6 @@ jobs:
       - name: Set image tag
         id: vars
         run: echo "tag=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
-
-      - name: Debug GitHub context
-        run: |
-          echo "=== GitHub Context ==="
-          echo "Repository: ${{ github.repository }}"
-          echo "Repository owner: ${{ github.repository_owner }}"
-          echo "Ref: ${{ github.ref }}"
-          echo "Ref name: ${{ github.ref_name }}"
-          echo "Event name: ${{ github.event_name }}"
-          echo ""
-          echo "=== Expected sub (old format) ==="
-          echo "repo:${{ github.repository }}:ref:${{ github.ref }}"
-
-      - name: Decode OIDC token payload
-        run: |
-          echo "=== Raw OIDC Token Payload ==="
-          TOKEN=$(curl -s \
-            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" \
-            | jq -r '.value')
-          echo "$TOKEN" | cut -d'.' -f2 | base64 -d 2>/dev/null | jq .
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
