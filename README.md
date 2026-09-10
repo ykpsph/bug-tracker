@@ -10,13 +10,12 @@ Full-stack Bug Tracker built with Spring Boot, React and PostgreSQL, evolving in
 - [x] [Phase 2](/docs/phases/02-docker.md) — Containerization → Docker + Docker Compose
 
 - [x] [Phase 3](/docs/phases/03-kubernetes.md) — Orchestration → Kubernetes
-- [ ] Phase 4 — Packaging → Helm
-- [ ] Phase 5 — Cloud Infrastructure → Floci
+- [x] [Phase 4](/docs/phases/04-AWS.md) — [AWS Deployment](/docs/phases/04-AWS.md) + [CI/CD](/docs/phases/05-CICD.md) → AWS ECR + EKS + VPC + IAM + RDS + Load Balancer + GitHub Actions
+- [ ] Phase 5 — Packaging → Helm
 - [ ] Phase 6 — Infrastructure as Code → Terraform
-- [ ] Phase 7 — CI GitHub → Actions
-- [ ] Phase 8 — GitOps → ArgoCD
-- [ ] Phase 9 — Observability Prometheus + Grafana + CloudWatch
-- [ ] Phase 10 — Production Architecture → EKS + RDS + S3 + ALB + Route53 + ACM
+- [ ] Phase 7 — GitOps → ArgoCD
+- [ ] Phase 8 — Observability → Prometheus + Grafana + CloudWatch
+
 
 ## Features
 - Dashboard with bug statistics and charts
