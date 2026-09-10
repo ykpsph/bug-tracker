@@ -20,7 +20,7 @@ const Header = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold text-gray-800">
-            Welcome back, {user?.username || 'User'}!
+            Welcomeeeeeeeeeeee back, {user?.username || 'User'}!
           </h2>
           <p className="text-sm text-gray-500">Manage your bugs efficiently</p>
         </div>
