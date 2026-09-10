@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-init
+  namespace: bugtracker
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: db-init
+        image: postgres:15-alpine
+        env:
+        - name: PGHOST
+          value: "bugtracker-db.cfqc2waagvan.eu-central-1.rds.amazonaws.com"
+        - name: PGUSER
+          valueFrom:
+            secretKeyRef:
+              name: bugtracker-secrets
+              key: DB_USERNAME
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: bugtracker-secrets
+              key: DB_PASSWORD
+        - name: PGDATABASE
+          value: postgres
+        - name: PGPORT
+          value: "5432"
+        command:
+        - sh
+        - -c
+        - |
+          echo "Checking if database 'bugtracker' exists..."
+          if psql -tAc "SELECT 1 FROM pg_database WHERE datname='bugtracker'" | grep -q 1; then
+            echo "Database 'bugtracker' already exists!"
+          else
+            echo "Creating database 'bugtracker'..."
+            psql -c "CREATE DATABASE bugtracker"
+            echo "Database 'bugtracker' created successfully!"
+          fi

@@ -1,0 +1,36 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: bugtracker
+  name: bugtracker-deployer
+rules:
+  # Deployment'ları oku ve güncelle
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch", "update", "patch"]
+  # Pod'ları oku (log, durum kontrolü için)
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "list", "watch"]
+  # Service'leri oku
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["get", "list", "watch"]
+  # ConfigMap ve Secret'ları oku (deploy sırasında kontrol için)
+  - apiGroups: [""]
+    resources: ["configmaps", "secrets"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: bugtracker-deployer-binding
+  namespace: bugtracker
+subjects:
+  - kind: Group
+    name: bugtracker-deployers
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: bugtracker-deployer
+  apiGroup: rbac.authorization.k8s.io

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bugtracker-config
+  namespace: bugtracker
+data:
+  DB_DDL_AUTO: "update"
+  DB_SHOW_SQL: "false"
+  LOG_LEVEL: "INFO"
+  SPRING_PROFILES_ACTIVE: "k8s"
